@@ -2,15 +2,10 @@
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 FILE *file;
-struct test2
-{
-    unsigned char x:8;
-    unsigned int: 0;
-    unsigned int y: 8;
-} ;
+float entropy = 0.0;
 void check_for_error(char *fileIn){
-
     if( fileIn  == NULL){
         printf("INPUT ERROR:NO FILE\nExample:    entropy.exe <target file>\n");
         exit(-1);
@@ -21,44 +16,44 @@ void check_for_error(char *fileIn){
         exit(-1);
     }
 }
-/// code from the notes not really needed right now 
-typedef struct _MESSAGE
-{
-    union
-    {   unsigned char bit1:1;
-        unsigned char bit2:2;
-        unsigned char bit3:3;
-        unsigned char bit4:4;
-        unsigned char bit5:5;
-        unsigned char bit6:6;
-        unsigned char bit7:7;
-        unsigned char bit8:8;
-    } BYTE;
-} MESSAGE;
-
-void readMsg()
-{
-    MESSAGE tMsg;
-    tMsg.BYTE.bit8 = 0xC;
-
-    printf("1=%x, 2=%x, 3=%x, 4=%x, 5=%x, 6=%x, 7=%x, 8=%x \n", 
-            tMsg.BYTE.bit1, tMsg.BYTE.bit2, tMsg.BYTE.bit3, tMsg.BYTE.bit4, 
-            tMsg.BYTE.bit5, tMsg.BYTE.bit6, tMsg.BYTE.bit7, tMsg.BYTE.bit8);
-    return;
-}
 /// get the next character in the file and covert it to hex
 char getLine(  ){
     unsigned int c;
     unsigned char hex;
     c = getc(file);
     hex = c;
-    printf("%x\n",hex);
-    //printf("%x\n",tMsg2.BYTE.bit8);
+}
+float findenp( int value ,float sum){
+    float  x = value/sum;
+    return   x  * log2(1/x);
 }
 int main( int argv,char *argc[]){
     //check for file
     check_for_error(argc[1]);
-    while(
-    getLine();
+    fseek(file,0,SEEK_END); 
+    int filesize = ftell(file);
+    fseek(file, 0L, SEEK_SET);
+    // ClearLoop
+    int array[255];
+    int j;
+    for(j =0;j < 256;j++) array[j] = 0.0;
+    int i = 0;
+    int totallevel = 0;
+
+    while(   i < filesize){
+        unsigned char hex = getLine();
+        unsigned int c = hex; 
+        array[c] = array[c] + 1;
+        totallevel++;	
+        i++; //i + 1 equal total;
+    }
+    i =0;
+    while(i< 256){
+        if(array[i] != 0){
+            entropy += findenp(array[i],totallevel);
+        }
+        i++;
+    }
+    printf("Entropy:%2.5lf\n",entropy);
 
 }// end of Main
